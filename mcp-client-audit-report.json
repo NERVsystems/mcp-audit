@@ -1,0 +1,766 @@
+[
+  {
+    "name": "takmcp",
+    "language": "Go",
+    "tools": [
+      {
+        "name": "connection_status",
+        "description": "Get the current TAK server connection status and statistics",
+        "description_tokens": 14,
+        "schema_tokens": 8,
+        "total_tokens": 22,
+        "has_long_description": false
+      },
+      {
+        "name": "cot_types",
+        "description": "Query the CoT type catalog to validate, lookup, or search for CoT types",
+        "description_tokens": 17,
+        "schema_tokens": 132,
+        "total_tokens": 149,
+        "has_long_description": false
+      },
+      {
+        "name": "create_data_package",
+        "description": "Create a TAK data package (.zip) for distributing CoT events, files, and other content to TAK clients.\n\nData packages are the standard way to share collections of tactical data in TAK systems. They can contain:\n- Existing CoT events from the TAK server (by UID)\n- Custom CoT XML events you create\n- Arbitrary files (KML, images, documents, etc.)\n\nThe tool automatically:\n- Creates a TAK-compliant ZIP with manifest.xml\n- Uploads to TAK server for distribution\n- Sends FileShare notifications to recipients\n- Returns download URL or package data\n\nCommon use cases:\n- Share mission plans with team members\n- Distribute map overlays and imagery\n- Package range/bearing graphics for visibility\n- Bundle tactical data for offline use\n\nExample: Create a package with custom events and files\n{\n  \"name\": \"Mission Alpha Package\",\n  \"description\": \"Tactical data for Operation Alpha\",\n  \"custom_events\": [\"\u003cevent version=\\\"2.0\\\" uid=\\\"alpha-1\\\" type=\\\"a-f-G\\\"\u003e...\u003c/event\u003e\"],\n  \"files\": [\n    {\n      \"filename\": \"mission_brief.txt\",\n      \"content\": \"Mission briefing text...\",\n      \"mime\": \"text/plain\"\n    }\n  ],\n  \"recipient_uid\": \"client-12345\"\n}",
+        "description_tokens": 285,
+        "schema_tokens": 342,
+        "total_tokens": 627,
+        "has_long_description": true
+      },
+      {
+        "name": "create_event",
+        "description": "# Create Event Tool Instructions\n\nThe create_event tool creates new TAK events on the map. CRITICAL: Always validate CoT types before creating events.\n\n## Required Parameters\n- **lat** (number): Latitude coordinate\n- **lon** (number): Longitude coordinate\n\n## Optional Parameters\n- **uid** (string): Unique identifier (auto-generated if not provided)\n- **type** (string): CoT event type (defaults to \"a-f-G\" if not provided)\n- **altitude** (number): Altitude in meters (defaults to 0)\n- **callsign** (string): Display name for the event\n- **remarks** (string): Additional information\n- **stale_duration** (number): Minutes until event becomes stale (defaults to 60)\n\n## ⚠️ CRITICAL: CoT Type Validation\n\n**ALWAYS validate CoT types before using them:**\n\n1. **If you know the exact CoT type**, validate it first:\n   `cot_types {\"operation\": \"validate\", \"type\": \"a-f-G-U-C\"}`\n\n2. **If you're unsure about the CoT type**, search for it:\n   `cot_types {\"operation\": \"search\", \"description\": \"hostile tank\"}`\n\n3. **NEVER guess or invent CoT types** - always use the cot_types tool\n\n## Common Valid CoT Types\n- **a-f-G-U-C**: Friendly ground unit/soldier\n- **a-h-G-U-C**: Hostile ground unit/soldier  \n- **a-n-G**: Neutral ground unit\n- **a-u-G**: Unknown ground unit\n- **b-g-.-G-G-A-L**: Landing zone\n- **a-f-G-I-X**: Medical facility\n- **b-r-.-h-c**: Casualty location\n\n## Example Usage\n```json\n{\n  \"lat\": 34.123456,\n  \"lon\": -118.654321,\n  \"type\": \"a-f-G-U-C\",\n  \"callsign\": \"ALPHA-1\",\n  \"remarks\": \"Patrol checkpoint\"\n}\n```\n\n## Error Handling\n- If the CoT type is invalid, the tool will return an error\n- **Always use cot_types tool** to find the correct designation\n- The tool automatically validates and may suggest replacements\n\n## Best Practices\n1. **Validate CoT type first** using cot_types tool\n2. Use descriptive callsigns and remarks\n3. Consider appropriate stale duration for the event type\n4. Place events precisely with accurate coordinates",
+        "description_tokens": 487,
+        "schema_tokens": 185,
+        "total_tokens": 672,
+        "has_long_description": true
+      },
+      {
+        "name": "create_range_bearing_circle",
+        "description": "Create a range circle around a center point for distance reference, weapon ranges, safety zones, and area of operations boundaries",
+        "description_tokens": 32,
+        "schema_tokens": 237,
+        "total_tokens": 269,
+        "has_long_description": false
+      },
+      {
+        "name": "create_range_bearing_line",
+        "description": "Create a range and bearing line between two points with distance/bearing calculations for tactical planning, fields of fire, patrol routes, and target reference",
+        "description_tokens": 40,
+        "schema_tokens": 252,
+        "total_tokens": 292,
+        "has_long_description": false
+      },
+      {
+        "name": "create_route",
+        "description": "Create a route graphic from a list of points",
+        "description_tokens": 11,
+        "schema_tokens": 84,
+        "total_tokens": 95,
+        "has_long_description": false
+      },
+      {
+        "name": "debug_chat_xml",
+        "description": "Send a chat message to a TAK chat room",
+        "description_tokens": 9,
+        "schema_tokens": 115,
+        "total_tokens": 124,
+        "has_long_description": false
+      },
+      {
+        "name": "delete_event",
+        "description": "Delete a CoT event from the TAK server",
+        "description_tokens": 9,
+        "schema_tokens": 33,
+        "total_tokens": 42,
+        "has_long_description": false
+      },
+      {
+        "name": "deploy_units",
+        "description": "Deploy units on the map based on terrain analysis and unit type",
+        "description_tokens": 15,
+        "schema_tokens": 99,
+        "total_tokens": 114,
+        "has_long_description": false
+      },
+      {
+        "name": "detect_formations",
+        "description": "Detect military unit formations using AI analysis",
+        "description_tokens": 12,
+        "schema_tokens": 37,
+        "total_tokens": 49,
+        "has_long_description": false
+      },
+      {
+        "name": "discover_schema",
+        "description": "Schema discovery and database exploration tool for TAK Server.\n\n## Purpose\nDiscover database schema, explore table structures, and debug non-standard TAK Server configurations.\n\n## Common Discovery Queries\n\n### List All Tables\n```sql\nSELECT table_name FROM information_schema.tables \nWHERE table_schema='public' \nORDER BY table_name;\n```\n\n### Examine Table Structure  \n```sql\nSELECT column_name, data_type, is_nullable, column_default\nFROM information_schema.columns \nWHERE table_name='latestcot'\nORDER BY ordinal_position;\n```\n\n### Check Table Sizes\n```sql\nSELECT schemaname, tablename, \n       pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size\nFROM pg_tables \nWHERE schemaname='public'\nORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;\n```\n\n### Discover CoT Types in Use\n```sql\nSELECT cot_type, COUNT(*) as count\nFROM latestcot\nGROUP BY cot_type\nORDER BY count DESC\nLIMIT 20;\n```\n\n### Find Custom Tables (Non-Standard TAK)\n```sql\nSELECT table_name FROM information_schema.tables \nWHERE table_schema='public'\n  AND table_name NOT IN ('latestcot', 'cot_router', 'mission', 'tak_user', 'groups', 'certificate')\nORDER BY table_name;\n```\n\n### Explore Table Data Sample\n```sql\nSELECT * FROM latestcot LIMIT 5;\n```\n\n### Check Database Version and Extensions\n```sql\nSELECT version();\nSELECT name, default_version, installed_version \nFROM pg_available_extensions \nWHERE name IN ('postgis', 'uuid-ossp', 'pgcrypto')\nORDER BY name;\n```\n\n## When to Use This Tool\n- TAK Server has custom schema modifications\n- Need to discover available tables and columns\n- Debugging database structure issues  \n- Exploring non-standard TAK deployments\n- execute_sql tool assumptions don't match your schema\n- Understanding what data is available in the database\n\n## Technical Notes\n- Uses same s2takdb DirectSQLClient as execute_sql\n- Same security and connection management\n- Optimized for INFORMATION_SCHEMA queries\n- Safe for schema exploration on any TAK Server\n- Includes helpful suggestions for schema discovery patterns",
+        "description_tokens": 510,
+        "schema_tokens": 77,
+        "total_tokens": 587,
+        "has_long_description": true
+      },
+      {
+        "name": "download_data_package",
+        "description": "Download or list TAK data packages from the server. Supports multiple access methods for flexibility.\n\nThis tool allows you to:\n- List all available packages on the TAK server\n- Download packages by SHA256 hash (fastest)\n- Search packages by name (partial matching)\n- Find packages by UID (exact match)\n- Save packages to local files\n- Get package metadata\n\nAccess methods:\n1. List all: {\"list_only\": true}\n2. Direct download: {\"hash\": \"sha256_hash_here\"}\n3. Search by name: {\"name\": \"mission alpha\"}\n4. Find by UID: {\"uid\": \"DP-12345678\"}\n\nThe tool returns:\n- For downloads: Base64-encoded package data\n- For listings: Array of available packages\n- For searches: Matching packages with metadata\n\nExample: List all packages\n{\n  \"list_only\": true\n}\n\nExample: Download specific package\n{\n  \"hash\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\n  \"save_path\": \"/tmp/mission_package.zip\",\n  \"include_metadata\": true\n}",
+        "description_tokens": 233,
+        "schema_tokens": 380,
+        "total_tokens": 613,
+        "has_long_description": true
+      },
+      {
+        "name": "execute_sql",
+        "description": "# TAK Server SQL Assistant Instructions\n\nYou are writing SQL for a TAK Server PostgreSQL database with PostGIS. Follow these core patterns:\n\n## Primary Tables (Use These 90% of the Time)\n\n### latestcot - Current Unit Status\n**Use for**: \"Where are units now?\" queries\n```sql\n-- Core columns: uid, cot_type, servertime, event_pt, detail\n-- Get callsign from XML: detail::xml #\u003e '{*/callsign}'\n-- Get coordinates: ST_Y(event_pt) as lat, ST_X(event_pt) as lon\n-- Always filter: WHERE servertime \u003e NOW() - INTERVAL '1 hour'\n```\n\n### cot_router - Historical Events  \n**Use for**: Historical analysis, movement tracking\n```sql\n-- Same columns as latestcot but ALL events (very large!)\n-- Always use time filters: WHERE servertime \u003e NOW() - INTERVAL '6 hours'\n-- Has servertime_hour for hourly aggregations\n```\n\n### mission - Data Packages/Missions\n**Use for**: Mission information\n```sql\n-- Key columns: id, name, description, create_time, creatoruid, groups\n```\n\n### tak_user - User Accounts\n**Use for**: User information  \n```sql\n-- Key columns: id, user_name, email_address, first_name, last_name, groups\n```\n\n## Essential Patterns\n\n### Always Use These Filters\n```sql\n-- Time filtering (MANDATORY for large tables)\nWHERE servertime \u003e NOW() - INTERVAL '1 hour'  -- or '6 hours', '24 hours'\n\n-- Limit results (MANDATORY for exploration)\nLIMIT 50  -- Start small, increase as needed\n\n-- Non-null locations\nWHERE event_pt IS NOT NULL\n```\n\n### Extract Data from XML Detail\n```sql\n-- Callsign: (xpath('//contact/@callsign', detail::xml))[1]::text\n-- Team: (xpath('//@name', detail::xml))[1]::text  \n-- Device: (xpath('//takv/@device', detail::xml))[1]::text\n-- Platform: (xpath('//takv/@platform', detail::xml))[1]::text\n-- Battery: (xpath('//status/@battery', detail::xml))[1]::text\n-- Role: (xpath('//__group/@role', detail::xml))[1]::text\n```\n\n### Geographic Queries (PostGIS)\n```sql\n-- Get coordinates\nST_Y(event_pt) as latitude, ST_X(event_pt) as longitude\n\n-- Distance queries (meters)\nST_Distance(event_pt, ST_SetSRID(ST_Point(lon, lat), 4326)) as distance_meters\n\n-- Within radius (use ST_DWithin, not ST_Distance \u003c X)\nWHERE ST_DWithin(event_pt, ST_SetSRID(ST_Point(-122.4, 37.8), 4326), 1000)\n```\n\n### Group Access (Bitfields)\n```sql\n-- Test group membership\nWHERE (groups \u0026 (1::bit(64) \u003c\u003c bitpos))::boolean\n```\n\n## Query Templates\n\n### Current Unit Positions\n```sql\nSELECT uid,\n       (xpath('//contact/@callsign', detail::xml))[1]::text as callsign,\n       cot_type,\n       ST_Y(event_pt) as lat,\n       ST_X(event_pt) as lon,\n       servertime\nFROM latestcot \nWHERE servertime \u003e NOW() - INTERVAL '1 hour'\n  AND event_pt IS NOT NULL\nORDER BY servertime DESC\nLIMIT 50;\n```\n\n### Unit Activity Summary\n```sql\nSELECT uid,\n       COUNT(*) as message_count,\n       MIN(servertime) as first_seen,\n       MAX(servertime) as last_seen\nFROM cot_router\nWHERE servertime \u003e NOW() - INTERVAL '6 hours'\nGROUP BY uid\nORDER BY message_count DESC\nLIMIT 20;\n```\n\n### Units Near Location\n```sql\nSELECT uid,\n       (xpath('//contact/@callsign', detail::xml))[1]::text as callsign,\n       ST_Distance(event_pt, ST_SetSRID(ST_Point($lon, $lat), 4326)) as distance_m\nFROM latestcot\nWHERE ST_DWithin(event_pt, ST_SetSRID(ST_Point($lon, $lat), 4326), 5000)\n  AND servertime \u003e NOW() - INTERVAL '2 hours'\nORDER BY distance_m\nLIMIT 25;\n```\n\n## Critical Rules\n\n1. **ALWAYS use LIMIT** - Tables can have millions of rows\n2. **ALWAYS filter by servertime** - Essential for performance  \n3. **Use latestcot for \"current\"** - Use cot_router for \"historical\"\n4. **Extract callsigns from XML** - They're not separate columns\n5. **Use ST_Y/ST_X for coordinates** - Not separate lat/lon columns\n6. **Use ST_DWithin for radius queries** - More efficient than ST_Distance\n7. **Start with small time windows** - Expand as needed\n\n## When You Need Other Tables\n- mission_*: Mission/data package operations\n- groups: Group definitions and hierarchy  \n- certificate: Client authentication\n- data_feed: External data sources\n- fed_event: Federation between servers\n\n## Schema Discovery (If Needed)\n```sql\n-- List tables\nSELECT table_name FROM information_schema.tables WHERE table_schema='public';\n\n-- Examine table structure\nSELECT column_name, data_type FROM information_schema.columns \nWHERE table_name='latestcot' ORDER BY ordinal_position;\n```\n\n**Remember**: This is a tactical military database - prioritize recent data, current positions, and operational relevance in your queries.",
+        "description_tokens": 1111,
+        "schema_tokens": 115,
+        "total_tokens": 1226,
+        "has_long_description": true
+      },
+      {
+        "name": "find_events",
+        "description": "Search cached events with optional time filters",
+        "description_tokens": 11,
+        "schema_tokens": 94,
+        "total_tokens": 105,
+        "has_long_description": false
+      },
+      {
+        "name": "get_database_stats",
+        "description": "Get comprehensive TAK Server database statistics and health metrics.\n\n## Purpose\nProvides database overview including table counts, record counts, storage usage, and overall database health. Useful for monitoring and understanding database scale.\n\n## What This Tool Returns\n- **Table count**: Total number of tables in database\n- **Record count**: Total records across all TAK tables  \n- **Database size**: Storage usage in human-readable format\n- **Key table statistics**: Records in critical tables\n- **Database version**: PostgreSQL version information\n\n## Key Metrics Provided\n- **Current position records**: Active unit positions\n- **Historical event records**: Total historical event count (can be large)\n- **Mission records**: Active missions and data packages\n- **User account records**: User account count\n- **Overall database health**: Size, performance indicators\n\n## When to Use\n- Database health monitoring\n- Understanding data scale before queries\n- Capacity planning and monitoring  \n- Troubleshooting performance issues\n- Getting overview before detailed analysis\n\n## Performance Notes\n- Lightweight operation optimized for quick results\n- Uses efficient PostgreSQL system catalogs\n- Safe to run frequently for monitoring\n- Does not scan large data tables directly",
+        "description_tokens": 320,
+        "schema_tokens": 37,
+        "total_tokens": 357,
+        "has_long_description": true
+      },
+      {
+        "name": "get_events",
+        "description": "Get recent CoT events from cache by type",
+        "description_tokens": 10,
+        "schema_tokens": 62,
+        "total_tokens": 72,
+        "has_long_description": false
+      },
+      {
+        "name": "get_sql_contacts",
+        "description": "Get current TAK unit contacts and positions from the database.\n\n## Purpose\nRetrieves active TAK units with their current positions, callsigns, and platform information. Uses the current position table (typically latestcot) which contains the most recent position report from each unit.\n\n## What This Tool Returns\n- **callsign**: Unit identifier (extracted from XML)\n- **uid**: Unique device identifier  \n- **cot_type**: CoT event type (e.g., \"a-f-G-U-C\" for friendly ground unit)\n- **latitude/longitude**: Current position coordinates\n- **platform**: Device type (e.g., WebTAK, ATAK, WinTAK variants)\n- **servertime**: When position was last updated\n- **stale**: When position becomes stale\n\n## Data Structure Notes\n- Callsigns are extracted from XML detail field using XPath\n- Coordinates come from PostGIS event_pt geometry\n- Platform info extracted from takv element in XML detail\n- Automatically filters to recent activity for performance\n\n## When to Use\n- Getting current unit positions for situational awareness\n- Finding active TAK clients and their platforms\n- Checking who's currently connected and reporting\n- Quick contact/unit summary without complex SQL\n\n## Performance\n- Optimized for current unit status (uses current position table, not historical)\n- Automatically applies time filters for performance\n- Returns structured contact data ready for display",
+        "description_tokens": 342,
+        "schema_tokens": 37,
+        "total_tokens": 379,
+        "has_long_description": true
+      },
+      {
+        "name": "get_tactical_disposition",
+        "description": "Get the current battlefield disposition including units, formations, and threat assessment",
+        "description_tokens": 22,
+        "schema_tokens": 37,
+        "total_tokens": 59,
+        "has_long_description": false
+      },
+      {
+        "name": "get_threat_assessment",
+        "description": "Get AI-driven threat analysis and recommendations",
+        "description_tokens": 12,
+        "schema_tokens": 37,
+        "total_tokens": 49,
+        "has_long_description": false
+      },
+      {
+        "name": "get_units_in_area",
+        "description": "Get tactical units within a specified geographic area",
+        "description_tokens": 13,
+        "schema_tokens": 133,
+        "total_tokens": 146,
+        "has_long_description": false
+      },
+      {
+        "name": "get_version",
+        "description": "Get the version and build information of the TAK MCP service",
+        "description_tokens": 15,
+        "schema_tokens": 8,
+        "total_tokens": 23,
+        "has_long_description": false
+      },
+      {
+        "name": "get_weather",
+        "description": "Get tactical weather intelligence for any location. Returns current conditions and optional forecast including temperature, wind (critical for NBC/airborne ops), humidity, and visibility conditions. Integrates with terrain_analysis for environmental assessment.",
+        "description_tokens": 65,
+        "schema_tokens": 172,
+        "total_tokens": 237,
+        "has_long_description": true
+      },
+      {
+        "name": "get_workflow",
+        "description": "Get tactical workflow templates for mission execution. Returns comprehensive step-by-step procedures for CASEVAC, MEDEVAC, SITREP, and other critical operations. This tool provides the same workflows registered as MCP prompts but accessible via Claude API.",
+        "description_tokens": 64,
+        "schema_tokens": 38,
+        "total_tokens": 102,
+        "has_long_description": true
+      },
+      {
+        "name": "list_clients",
+        "description": "List clients connected to the TAK server",
+        "description_tokens": 10,
+        "schema_tokens": 37,
+        "total_tokens": 47,
+        "has_long_description": false
+      },
+      {
+        "name": "optimize_route",
+        "description": "Optimize a route and create it on the TAK server",
+        "description_tokens": 12,
+        "schema_tokens": 84,
+        "total_tokens": 96,
+        "has_long_description": false
+      },
+      {
+        "name": "query_cot_events",
+        "description": "Query historical CoT events from TAK Server with time range and spatial filtering.\n\n## Purpose  \nSearch the historical event database for CoT events within specified time ranges. Historical tables can contain large numbers of events, so proper filtering is essential.\n\n## What This Tool Returns\n- **Historical event data** with full CoT details\n- **Movement tracking** showing unit positions over time\n- **Activity patterns** and operational timelines\n- **Rich XML detail** including tactical information\n- **Platform information** (varies by deployment)\n\n## Key Parameters\n- **start_time/end_time**: ISO format (e.g., \"2025-01-01T00:00:00Z\")\n- **callsign**: Filter by specific unit callsign (optional)\n- **cot_type**: Filter by event type (optional)\n- **limit**: Maximum results (automatically limited for performance)\n\n## Performance Considerations\n- **ALWAYS use time ranges** - Historical tables can be very large\n- **Start with short time windows** (hours, not days)\n- **Results are automatically limited** for performance\n- **Uses historical event table** (not current position table)\n\n## Data Structure\n- Same XML structure as current events\n- Callsigns in detail XML: xpath('//contact/@callsign')\n- Coordinates from PostGIS event_pt geometry\n- Platform from takv element: xpath('//takv/@platform')\n\n## When to Use\n- Analyzing unit movement patterns over time\n- Historical operational analysis\n- Tracking specific events or activities\n- Understanding unit behavior and patterns\n- Building movement timelines or tracks",
+        "description_tokens": 381,
+        "schema_tokens": 61,
+        "total_tokens": 442,
+        "has_long_description": true
+      },
+      {
+        "name": "read_cot_log",
+        "description": "Read CoT log files for debugging",
+        "description_tokens": 8,
+        "schema_tokens": 68,
+        "total_tokens": 76,
+        "has_long_description": false
+      },
+      {
+        "name": "read_event",
+        "description": "Read a CoT event from the TAK server by its unique identifier",
+        "description_tokens": 15,
+        "schema_tokens": 32,
+        "total_tokens": 47,
+        "has_long_description": false
+      },
+      {
+        "name": "read_tile_cache",
+        "description": "Read a cached tile image from the cache directory",
+        "description_tokens": 12,
+        "schema_tokens": 33,
+        "total_tokens": 45,
+        "has_long_description": false
+      },
+      {
+        "name": "send_chat",
+        "description": "Send chat messages via s2tak v0.4.0 Client Chat API. For DIRECT messages, use 'recipient_uid' parameter with the target client's UID (get UIDs from list_clients tool). For BROADCAST messages, use 'chatroom' parameter set to 'All Chat Rooms'. Both callsign and message are required. The s2tak API requires both UID and callsign for direct messaging - the tool handles callsign discovery automatically.",
+        "description_tokens": 100,
+        "schema_tokens": 296,
+        "total_tokens": 396,
+        "has_long_description": true
+      },
+      {
+        "name": "send_file_share",
+        "description": "Send files to TAK clients using the TAK FileShare protocol. Implements proper file distribution with notifications.\n\nThe TAK FileShare protocol:\n1. Uploads file to TAK server REST API\n2. Sends FileShare CoT event with download URL\n3. Recipients see notification and can download\n\nThis tool handles:\n- Text files (direct string content)\n- Binary files (base64-encoded content)\n- Automatic hash calculation for integrity\n- Targeted sharing to specific recipients\n- Proper TAK server authentication\n\nFile size considerations:\n- Small files (\u003c5MB): Quick upload/download\n- Large files: May take time, consider data packages\n- Binary files: Must be base64-encoded\n\nExample: Share a text file\n{\n  \"filename\": \"mission_update.txt\",\n  \"file_data\": \"Team Alpha proceed to checkpoint 3\",\n  \"sender_callsign\": \"HQ\",\n  \"recipient_uid\": \"alpha-leader-uid\",\n  \"remarks\": \"Updated mission parameters\"\n}\n\nExample: Share a binary file (base64)\n{\n  \"filename\": \"aerial_photo.jpg\",\n  \"file_data\": \"iVBORw0KGgoAAAANS...\",\n  \"sender_callsign\": \"RECON-1\"\n}",
+        "description_tokens": 258,
+        "schema_tokens": 376,
+        "total_tokens": 634,
+        "has_long_description": true
+      },
+      {
+        "name": "stream_subscribe",
+        "description": "Subscribe to the raw event stream",
+        "description_tokens": 8,
+        "schema_tokens": 8,
+        "total_tokens": 16,
+        "has_long_description": false
+      },
+      {
+        "name": "stream_unsubscribe",
+        "description": "Unsubscribe from the raw event stream",
+        "description_tokens": 9,
+        "schema_tokens": 37,
+        "total_tokens": 46,
+        "has_long_description": false
+      },
+      {
+        "name": "subscribe_cot",
+        "description": "Subscribe to Cursor on Target (CoT) events of a specific type",
+        "description_tokens": 15,
+        "schema_tokens": 40,
+        "total_tokens": 55,
+        "has_long_description": false
+      },
+      {
+        "name": "terrain_analysis",
+        "description": "Analyze terrain at specified coordinates and provide terrain information",
+        "description_tokens": 18,
+        "schema_tokens": 352,
+        "total_tokens": 370,
+        "has_long_description": false
+      },
+      {
+        "name": "update_event",
+        "description": "# Update Event Tool Instructions\n\nThe update_event tool modifies existing TAK events. CRITICAL: Always validate CoT types when updating event types.\n\n## Required Parameters\n- **uid** (string): Unique identifier of the event to update\n\n## Optional Parameters (provide only what you want to change)\n- **type** (string): New CoT event type\n- **lat** (number): New latitude coordinate\n- **lon** (number): New longitude coordinate  \n- **altitude** (number): New altitude in meters\n- **callsign** (string): New display name\n- **remarks** (string): New additional information\n- **stale_duration** (number): New minutes until stale\n\n## ⚠️ CRITICAL: CoT Type Validation\n\n**When updating the 'type' parameter, ALWAYS validate first:**\n\n1. **Validate the new CoT type**:\n   `cot_types {\"operation\": \"validate\", \"type\": \"a-h-G-U-C\"}`\n\n2. **If unsure, search for the correct type**:\n   `cot_types {\"operation\": \"search\", \"description\": \"enemy vehicle\"}`\n\n3. **NEVER guess CoT types** - validation is mandatory\n\n## Update Behavior\n- **Partial updates**: Only provide parameters you want to change\n- **Preserves existing values**: Unchanged fields keep their current values\n- **Reads existing event**: Tool fetches current state first\n- **Returns updated values**: Shows final state after update\n\n## Example Usage\n```json\n{\n  \"uid\": \"UNIT-12345\",\n  \"type\": \"a-h-G-U-C\",\n  \"remarks\": \"Enemy contact confirmed\"\n}\n```\n\n## Common Update Scenarios\n1. **Change unit status**: Update type from unknown to friendly/hostile\n2. **Update position**: New lat/lon coordinates\n3. **Add information**: Update callsign or remarks\n4. **Extend duration**: Change stale_duration\n\n## Error Handling\n- **Event not found**: Returns `{\"updated\": false, \"reason\": \"not found\"}`\n- **Invalid CoT type**: Tool will return error - use cot_types to find correct type\n- **Invalid parameters**: Tool validates all inputs\n\n## Best Practices\n1. **Always validate new CoT types** using cot_types tool\n2. **Use partial updates**: Only specify fields that need changes\n3. **Verify UID exists**: Check event exists before updating\n4. **Meaningful updates**: Ensure changes serve operational purpose",
+        "description_tokens": 536,
+        "schema_tokens": 180,
+        "total_tokens": 716,
+        "has_long_description": true
+      }
+    ],
+    "total_tokens": 9396,
+    "summary": {
+      "tool_count": 37,
+      "avg_tokens_per_tool": 253,
+      "max_tokens_per_tool": 1226,
+      "min_tokens_per_tool": 16,
+      "long_description_tools": 13
+    },
+    "bloat_issues": [
+      {
+        "type": "verbose_description",
+        "description": "Tool 'create_data_package' has very long description (285 tokens)",
+        "tool_name": "create_data_package",
+        "tokens": 285,
+        "suggestion": "Consider breaking into sections or using more concise language"
+      },
+      {
+        "type": "large_schema",
+        "description": "Tool 'create_data_package' has large input schema (342 tokens)",
+        "tool_name": "create_data_package",
+        "tokens": 342,
+        "suggestion": "Consider simplifying parameter structure or descriptions"
+      },
+      {
+        "type": "verbose_description",
+        "description": "Tool 'create_event' has very long description (487 tokens)",
+        "tool_name": "create_event",
+        "tokens": 487,
+        "suggestion": "Consider breaking into sections or using more concise language"
+      },
+      {
+        "type": "large_schema",
+        "description": "Tool 'create_range_bearing_circle' has large input schema (237 tokens)",
+        "tool_name": "create_range_bearing_circle",
+        "tokens": 237,
+        "suggestion": "Consider simplifying parameter structure or descriptions"
+      },
+      {
+        "type": "large_schema",
+        "description": "Tool 'create_range_bearing_line' has large input schema (252 tokens)",
+        "tool_name": "create_range_bearing_line",
+        "tokens": 252,
+        "suggestion": "Consider simplifying parameter structure or descriptions"
+      },
+      {
+        "type": "verbose_description",
+        "description": "Tool 'discover_schema' has very long description (510 tokens)",
+        "tool_name": "discover_schema",
+        "tokens": 510,
+        "suggestion": "Consider breaking into sections or using more concise language"
+      },
+      {
+        "type": "verbose_description",
+        "description": "Tool 'download_data_package' has very long description (233 tokens)",
+        "tool_name": "download_data_package",
+        "tokens": 233,
+        "suggestion": "Consider breaking into sections or using more concise language"
+      },
+      {
+        "type": "large_schema",
+        "description": "Tool 'download_data_package' has large input schema (380 tokens)",
+        "tool_name": "download_data_package",
+        "tokens": 380,
+        "suggestion": "Consider simplifying parameter structure or descriptions"
+      },
+      {
+        "type": "verbose_description",
+        "description": "Tool 'execute_sql' has very long description (1111 tokens)",
+        "tool_name": "execute_sql",
+        "tokens": 1111,
+        "suggestion": "Consider breaking into sections or using more concise language"
+      },
+      {
+        "type": "verbose_description",
+        "description": "Tool 'get_database_stats' has very long description (320 tokens)",
+        "tool_name": "get_database_stats",
+        "tokens": 320,
+        "suggestion": "Consider breaking into sections or using more concise language"
+      },
+      {
+        "type": "verbose_description",
+        "description": "Tool 'get_sql_contacts' has very long description (342 tokens)",
+        "tool_name": "get_sql_contacts",
+        "tokens": 342,
+        "suggestion": "Consider breaking into sections or using more concise language"
+      },
+      {
+        "type": "verbose_description",
+        "description": "Tool 'query_cot_events' has very long description (381 tokens)",
+        "tool_name": "query_cot_events",
+        "tokens": 381,
+        "suggestion": "Consider breaking into sections or using more concise language"
+      },
+      {
+        "type": "large_schema",
+        "description": "Tool 'send_chat' has large input schema (296 tokens)",
+        "tool_name": "send_chat",
+        "tokens": 296,
+        "suggestion": "Consider simplifying parameter structure or descriptions"
+      },
+      {
+        "type": "verbose_description",
+        "description": "Tool 'send_file_share' has very long description (258 tokens)",
+        "tool_name": "send_file_share",
+        "tokens": 258,
+        "suggestion": "Consider breaking into sections or using more concise language"
+      },
+      {
+        "type": "large_schema",
+        "description": "Tool 'send_file_share' has large input schema (376 tokens)",
+        "tool_name": "send_file_share",
+        "tokens": 376,
+        "suggestion": "Consider simplifying parameter structure or descriptions"
+      },
+      {
+        "type": "large_schema",
+        "description": "Tool 'terrain_analysis' has large input schema (352 tokens)",
+        "tool_name": "terrain_analysis",
+        "tokens": 352,
+        "suggestion": "Consider simplifying parameter structure or descriptions"
+      },
+      {
+        "type": "verbose_description",
+        "description": "Tool 'update_event' has very long description (536 tokens)",
+        "tool_name": "update_event",
+        "tokens": 536,
+        "suggestion": "Consider breaking into sections or using more concise language"
+      }
+    ]
+  },
+  {
+    "name": "osmmcp",
+    "language": "Go",
+    "tools": [
+      {
+        "name": "analyze_commute",
+        "description": "Analyze transportation options between home and work locations",
+        "description_tokens": 15,
+        "schema_tokens": 158,
+        "total_tokens": 173,
+        "has_long_description": false
+      },
+      {
+        "name": "analyze_neighborhood",
+        "description": "Evaluate neighborhood livability for real estate and relocation decisions",
+        "description_tokens": 18,
+        "schema_tokens": 150,
+        "total_tokens": 168,
+        "has_long_description": false
+      },
+      {
+        "name": "bbox_from_points",
+        "description": "Create a bounding box that encompasses all given geographic coordinates",
+        "description_tokens": 17,
+        "schema_tokens": 40,
+        "total_tokens": 57,
+        "has_long_description": false
+      },
+      {
+        "name": "centroid_points",
+        "description": "Calculate the geographic centroid (mean center) of a set of coordinates",
+        "description_tokens": 17,
+        "schema_tokens": 39,
+        "total_tokens": 56,
+        "has_long_description": false
+      },
+      {
+        "name": "enrich_emissions",
+        "description": "Enrich route options with CO2 emissions, calorie burn, and cost estimates",
+        "description_tokens": 18,
+        "schema_tokens": 42,
+        "total_tokens": 60,
+        "has_long_description": false
+      },
+      {
+        "name": "explore_area",
+        "description": "Explore and describe an area based on its coordinates",
+        "description_tokens": 13,
+        "schema_tokens": 87,
+        "total_tokens": 100,
+        "has_long_description": false
+      },
+      {
+        "name": "filter_tags",
+        "description": "Filter OSM elements by specified tags",
+        "description_tokens": 9,
+        "schema_tokens": 70,
+        "total_tokens": 79,
+        "has_long_description": false
+      },
+      {
+        "name": "find_charging_stations",
+        "description": "Find electric vehicle charging stations near a specific location",
+        "description_tokens": 16,
+        "schema_tokens": 108,
+        "total_tokens": 124,
+        "has_long_description": false
+      },
+      {
+        "name": "find_nearby_places",
+        "description": "Find points of interest near a specific location",
+        "description_tokens": 12,
+        "schema_tokens": 137,
+        "total_tokens": 149,
+        "has_long_description": false
+      },
+      {
+        "name": "find_parking_facilities",
+        "description": "Find parking facilities near a specific location",
+        "description_tokens": 12,
+        "schema_tokens": 168,
+        "total_tokens": 180,
+        "has_long_description": false
+      },
+      {
+        "name": "find_schools_nearby",
+        "description": "Find educational institutions near a specific location",
+        "description_tokens": 13,
+        "schema_tokens": 143,
+        "total_tokens": 156,
+        "has_long_description": false
+      },
+      {
+        "name": "geo_distance",
+        "description": "Calculate the distance between two geographic coordinates using the Haversine formula",
+        "description_tokens": 21,
+        "schema_tokens": 63,
+        "total_tokens": 84,
+        "has_long_description": false
+      },
+      {
+        "name": "geocode_address",
+        "description": "Convert an address or place name to geographic coordinates",
+        "description_tokens": 14,
+        "schema_tokens": 150,
+        "total_tokens": 164,
+        "has_long_description": false
+      },
+      {
+        "name": "get_map_image",
+        "description": "Retrieve and display an OpenStreetMap image for analysis",
+        "description_tokens": 14,
+        "schema_tokens": 78,
+        "total_tokens": 92,
+        "has_long_description": false
+      },
+      {
+        "name": "get_route_directions",
+        "description": "Get directions for a route between two locations",
+        "description_tokens": 12,
+        "schema_tokens": 124,
+        "total_tokens": 136,
+        "has_long_description": false
+      },
+      {
+        "name": "get_version",
+        "description": "Get the version and build information of the OSM MCP service",
+        "description_tokens": 15,
+        "schema_tokens": 8,
+        "total_tokens": 23,
+        "has_long_description": false
+      },
+      {
+        "name": "osm_query_bbox",
+        "description": "Query OpenStreetMap data within a bounding box with tag filters. Requirements: (1) Use exact field names: minLat, minLon, maxLat, maxLon (case-sensitive), (2) Latitude range: -90 to 90, (3) Longitude range: -180 to 180, (4) minLat \u003c maxLat, (5) minLon \u003c maxLon. Example usage: bbox: {\"minLat\": 37.77, \"minLon\": -122.42, \"maxLat\": 37.78, \"maxLon\": -122.41}, tags: {\"amenity\": \"restaurant\", \"cuisine\": \"*\"}",
+        "description_tokens": 101,
+        "schema_tokens": 155,
+        "total_tokens": 256,
+        "has_long_description": true
+      },
+      {
+        "name": "polyline_decode",
+        "description": "Decode an encoded polyline string into a series of geographic coordinates",
+        "description_tokens": 18,
+        "schema_tokens": 34,
+        "total_tokens": 52,
+        "has_long_description": false
+      },
+      {
+        "name": "polyline_encode",
+        "description": "Encode a series of geographic coordinates into a polyline string",
+        "description_tokens": 16,
+        "schema_tokens": 35,
+        "total_tokens": 51,
+        "has_long_description": false
+      },
+      {
+        "name": "reverse_geocode",
+        "description": "Convert geographic coordinates to a human-readable address",
+        "description_tokens": 14,
+        "schema_tokens": 68,
+        "total_tokens": 82,
+        "has_long_description": false
+      },
+      {
+        "name": "route_fetch",
+        "description": "Fetch a route between two points using OSRM routing service",
+        "description_tokens": 14,
+        "schema_tokens": 86,
+        "total_tokens": 100,
+        "has_long_description": false
+      },
+      {
+        "name": "route_sample",
+        "description": "Sample points along a route at specified intervals",
+        "description_tokens": 12,
+        "schema_tokens": 63,
+        "total_tokens": 75,
+        "has_long_description": false
+      },
+      {
+        "name": "sort_by_distance",
+        "description": "Sort OSM elements by distance from a reference point",
+        "description_tokens": 13,
+        "schema_tokens": 58,
+        "total_tokens": 71,
+        "has_long_description": false
+      },
+      {
+        "name": "suggest_meeting_point",
+        "description": "Suggest optimal meeting points for multiple participants",
+        "description_tokens": 14,
+        "schema_tokens": 88,
+        "total_tokens": 102,
+        "has_long_description": false
+      },
+      {
+        "name": "tile_cache",
+        "description": "Manage and access cached map tiles",
+        "description_tokens": 8,
+        "schema_tokens": 98,
+        "total_tokens": 106,
+        "has_long_description": false
+      }
+    ],
+    "total_tokens": 2696,
+    "summary": {
+      "tool_count": 25,
+      "avg_tokens_per_tool": 107,
+      "max_tokens_per_tool": 256,
+      "min_tokens_per_tool": 23,
+      "long_description_tools": 1
+    },
+    "bloat_issues": [
+      {
+        "type": "verbose_description",
+        "description": "Tool 'osm_query_bbox' has very long description (101 tokens)",
+        "tool_name": "osm_query_bbox",
+        "tokens": 101,
+        "suggestion": "Consider breaking into sections or using more concise language"
+      }
+    ]
+  },
+  {
+    "name": "examcp",
+    "language": "TypeScript",
+    "tools": [
+      {
+        "name": "web_search_exa",
+        "description": "Search the web using Exa AI - performs real-time web searches and can scrape content from specific URLs. Supports configurable result counts and returns the content from the most relevant websites.",
+        "description_tokens": 49,
+        "schema_tokens": 71,
+        "total_tokens": 120,
+        "has_long_description": false
+      },
+      {
+        "name": "research_paper_search_exa",
+        "description": "Search for academic papers and research using Exa AI - specializes in finding scholarly articles, research papers, and academic content. Returns detailed information about research findings and academic sources.",
+        "description_tokens": 52,
+        "schema_tokens": 75,
+        "total_tokens": 127,
+        "has_long_description": true
+      },
+      {
+        "name": "company_research_exa",
+        "description": "Research companies using Exa AI - finds comprehensive information about businesses, organizations, and corporations. Provides insights into company operations, news, financial information, and industry analysis.",
+        "description_tokens": 52,
+        "schema_tokens": 78,
+        "total_tokens": 130,
+        "has_long_description": true
+      },
+      {
+        "name": "crawling_exa",
+        "description": "Extract and crawl content from specific URLs using Exa AI - retrieves full text content, metadata, and structured information from web pages. Ideal for extracting detailed content from known URLs.",
+        "description_tokens": 49,
+        "schema_tokens": 76,
+        "total_tokens": 125,
+        "has_long_description": false
+      },
+      {
+        "name": "competitor_finder_exa",
+        "description": "Find competitors for a business using Exa AI - identifies similar companies, competitive landscape analysis, and market positioning. Helps discover direct and indirect competitors in any industry.",
+        "description_tokens": 49,
+        "schema_tokens": 103,
+        "total_tokens": 152,
+        "has_long_description": false
+      },
+      {
+        "name": "linkedin_search_exa",
+        "description": "Search LinkedIn profiles and companies using Exa AI - finds professional profiles, company pages, and business-related content on LinkedIn. Useful for networking, recruitment, and business research.",
+        "description_tokens": 49,
+        "schema_tokens": 117,
+        "total_tokens": 166,
+        "has_long_description": false
+      },
+      {
+        "name": "wikipedia_search_exa",
+        "description": "Search Wikipedia articles using Exa AI - finds comprehensive, factual information from Wikipedia entries. Ideal for research, fact-checking, and getting authoritative information on various topics.",
+        "description_tokens": 49,
+        "schema_tokens": 84,
+        "total_tokens": 133,
+        "has_long_description": false
+      },
+      {
+        "name": "github_search_exa",
+        "description": "Search GitHub repositories and code using Exa AI - finds repositories, code snippets, documentation, and developer profiles on GitHub. Useful for finding open source projects, code examples, and technical resources.",
+        "description_tokens": 53,
+        "schema_tokens": 121,
+        "total_tokens": 174,
+        "has_long_description": true
+      },
+      {
+        "name": "deep_researcher_start",
+        "description": "Start a comprehensive AI-powered deep research task for complex queries. This tool initiates an intelligent agent that performs extensive web searches, crawls relevant pages, analyzes information, and synthesizes findings into a detailed research report. The agent thinks critically about the research topic and provides thorough, well-sourced answers. Use this for complex research questions that require in-depth analysis rather than simple searches. After starting a research task, IMMEDIATELY use deep_researcher_check with the returned task ID to monitor progress and retrieve results.",
+        "description_tokens": 147,
+        "schema_tokens": 151,
+        "total_tokens": 298,
+        "has_long_description": true
+      },
+      {
+        "name": "deep_researcher_check",
+        "description": "Check the status and retrieve results of a deep research task. This tool monitors the progress of an AI agent that performs comprehensive web searches, analyzes multiple sources, and synthesizes findings into detailed research reports. The tool includes a built-in 5-second delay before checking to allow processing time. IMPORTANT: You must call this tool repeatedly (poll) until the status becomes 'completed' to get the final research results. When status is 'running', wait a few seconds and call this tool again with the same task ID.",
+        "description_tokens": 134,
+        "schema_tokens": 57,
+        "total_tokens": 191,
+        "has_long_description": true
+      }
+    ],
+    "total_tokens": 1616,
+    "summary": {
+      "tool_count": 10,
+      "avg_tokens_per_tool": 161,
+      "max_tokens_per_tool": 298,
+      "min_tokens_per_tool": 120,
+      "long_description_tools": 5
+    },
+    "bloat_issues": [
+      {
+        "type": "verbose_description",
+        "description": "Tool 'deep_researcher_start' has very long description (147 tokens)",
+        "tool_name": "deep_researcher_start",
+        "tokens": 147,
+        "suggestion": "Consider breaking into sections or using more concise language"
+      },
+      {
+        "type": "verbose_description",
+        "description": "Tool 'deep_researcher_check' has very long description (134 tokens)",
+        "tool_name": "deep_researcher_check",
+        "tokens": 134,
+        "suggestion": "Consider breaking into sections or using more concise language"
+      }
+    ]
+  }
+]
