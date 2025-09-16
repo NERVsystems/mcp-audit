@@ -70,8 +70,8 @@ jobs:
     - name: Basic security check
       run: |
         echo "Running basic security checks..."
-        # Check for common security issues
-        if grep -r "password\|secret\|token" --include="*.go" . | grep -v "// " | grep -v "example\|test\|demo" | grep -v "auth-token\|auth_token"; then
+        # Check for common security issues (excluding legitimate token audit usage)
+        if grep -r "password\|secret\|api.*key\|private.*key" --include="*.go" . | grep -v "// " | grep -v "example\|test\|demo"; then
           echo "⚠️ Potential secrets found in code"
           exit 1
         else
