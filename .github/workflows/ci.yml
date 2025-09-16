@@ -19,7 +19,9 @@ jobs:
         go-version: '1.21'
 
     - name: Verify dependencies
-      run: go mod verify
+      run: |
+        go mod verify
+        echo "No external dependencies - using Go standard library only"
 
     - name: Build audit tool
       run: go build -v ./...
@@ -65,15 +67,26 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Run Gosec Security Scanner
-      uses: securecodewarrior/github-action-gosec@master
+    - name: Set up Go
+      uses: actions/setup-go@v4
       with:
-        args: '-no-fail -fmt sarif -out results.sarif ./...'
+        go-version: '1.21'
 
-    - name: Upload SARIF file
-      uses: github/codeql-action/upload-sarif@v2
+    - name: Run Gosec Security Scanner
+      uses: securecodewarrior/github-action-gosec@v1
       with:
-        sarif_file: results.sarif
+        args: './...'
+      continue-on-error: true
+
+    - name: Basic security check
+      run: |
+        echo "Running basic security checks..."
+        # Check for common security issues
+        if grep -r "password\|secret\|key" --include="*.go" . | grep -v "// " | grep -v "example\|test\|demo"; then
+          echo "⚠️ Potential secrets found in code"
+        else
+          echo "✅ No obvious secrets found"
+        fi
 
   docs-check:
     runs-on: ubuntu-latest

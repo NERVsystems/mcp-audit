@@ -253,8 +253,10 @@ func getMCPTools(config ServerConfig) ([]MCPTool, error) {
 
 	defer func() {
 		stdin.Close()
-		cmd.Process.Kill()
-		cmd.Wait()
+		if cmd.Process != nil {
+			_ = cmd.Process.Kill()
+		}
+		_ = cmd.Wait()
 	}()
 
 	// Give the server more time to start and check if it's still running
@@ -570,7 +572,12 @@ func generateHumanReport(audits []MCPServerAudit) {
 			totalBloatTokens, float64(totalBloatTokens)/float64(totalTokens)*100))
 
 		for bloatType, issues := range bloatByType {
-			report.WriteString(fmt.Sprintf("### %s (%d issues)\n", strings.Title(strings.ReplaceAll(bloatType, "_", " ")), len(issues)))
+			// Title case conversion without deprecated strings.Title
+			titleCase := strings.ReplaceAll(bloatType, "_", " ")
+			if len(titleCase) > 0 {
+				titleCase = strings.ToUpper(titleCase[:1]) + titleCase[1:]
+			}
+			report.WriteString(fmt.Sprintf("### %s (%d issues)\n", titleCase, len(issues)))
 
 			// Show top 5 worst offenders
 			sort.Slice(issues, func(i, j int) bool {
