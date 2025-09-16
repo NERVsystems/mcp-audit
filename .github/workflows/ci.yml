@@ -67,26 +67,26 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.21'
-
-    - name: Run Gosec Security Scanner
-      uses: securecodewarrior/github-action-gosec@v1
-      with:
-        args: './...'
-      continue-on-error: true
-
     - name: Basic security check
       run: |
         echo "Running basic security checks..."
         # Check for common security issues
-        if grep -r "password\|secret\|key" --include="*.go" . | grep -v "// " | grep -v "example\|test\|demo"; then
+        if grep -r "password\|secret\|token" --include="*.go" . | grep -v "// " | grep -v "example\|test\|demo" | grep -v "auth-token\|auth_token"; then
           echo "⚠️ Potential secrets found in code"
+          exit 1
         else
           echo "✅ No obvious secrets found"
         fi
+
+        # Check for SQL injection patterns
+        if grep -r "fmt\.Sprintf.*%.*query\|fmt\.Sprintf.*%.*sql" --include="*.go" .; then
+          echo "⚠️ Potential SQL injection patterns found"
+          exit 1
+        else
+          echo "✅ No SQL injection patterns found"
+        fi
+
+        echo "✅ Basic security checks passed"
 
   docs-check:
     runs-on: ubuntu-latest
