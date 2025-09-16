@@ -1,0 +1,137 @@
+name: MCP Audit Tool CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+
+    - name: Verify dependencies
+      run: go mod verify
+
+    - name: Build audit tool
+      run: go build -v ./...
+
+    - name: Test compilation
+      run: |
+        echo "Testing audit tool compilation..."
+        go build -o mcp-audit mcp-client-audit.go
+        ./mcp-audit --help || echo "Tool built successfully (help not implemented)"
+
+    - name: Run basic syntax check
+      run: |
+        echo "Running Go syntax checks..."
+        go vet ./...
+
+    - name: Check formatting
+      run: |
+        if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+          echo "Code is not properly formatted:"
+          gofmt -s -l .
+          exit 1
+        fi
+        echo "Code formatting is correct"
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v3
+      with:
+        version: latest
+        args: --timeout=5m
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run Gosec Security Scanner
+      uses: securecodewarrior/github-action-gosec@master
+      with:
+        args: '-no-fail -fmt sarif -out results.sarif ./...'
+
+    - name: Upload SARIF file
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: results.sarif
+
+  docs-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Check documentation completeness
+      run: |
+        echo "Checking required documentation files..."
+        required_files=(
+          "README.md"
+          "PRODUCTION-GUIDE.md"
+          "FINAL-AUDIT-SUMMARY.md"
+        )
+
+        for file in "${required_files[@]}"; do
+          if [ ! -f "$file" ]; then
+            echo "❌ Missing required file: $file"
+            exit 1
+          else
+            echo "✅ Found: $file"
+          fi
+        done
+
+        echo "📚 All documentation files present"
+
+  audit-reports-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Validate audit reports
+      run: |
+        echo "Checking audit report files..."
+
+        # Check JSON report exists and is valid JSON
+        if [ -f "mcp-client-audit-report.json" ]; then
+          echo "✅ JSON report found"
+          if python3 -m json.tool mcp-client-audit-report.json > /dev/null; then
+            echo "✅ JSON report is valid"
+          else
+            echo "❌ JSON report is malformed"
+            exit 1
+          fi
+        else
+          echo "⚠️ No JSON report found (this is ok for initial commits)"
+        fi
+
+        # Check markdown report
+        if [ -f "mcp-client-audit-report.md" ]; then
+          echo "✅ Markdown report found"
+          # Basic check for expected content
+          if grep -q "MCP Client-Based Token Audit Report" mcp-client-audit-report.md; then
+            echo "✅ Markdown report has expected header"
+          else
+            echo "❌ Markdown report missing expected header"
+            exit 1
+          fi
+        else
+          echo "⚠️ No Markdown report found (this is ok for initial commits)"
+        fi
